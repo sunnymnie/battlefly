@@ -16,7 +16,7 @@ class Weapon():
         self.effects = effects
         self.name = name
         
-    def fast_forward_time_by(s):
+    def fast_forward_time_by(self, s):
         """
         speeds up reload by s seconds and fire if reload reaches 0
         """
@@ -25,7 +25,7 @@ class Weapon():
             self.reload_wait += self.reload
             self.shoot_at_enemy()
         
-    def shoot_at_enemy():
+    def shoot_at_enemy(self):
         # Reduce enemy health
         for _ in range(self.burst):
             rng = random.uniform(0, 1)
@@ -38,43 +38,44 @@ class Weapon():
                 else:
                     enemy.hull -= dmg
     
-    def add_owner(bf):
+    def add_owner(self, bf):
         self.me = bf
         
-    def add_enemy(bf):
+    def add_enemy(self, bf):
         self.enemy = bf
         
-    def remove_enemy():
+    def remove_enemy(self):
         self.enemy = None
     
 class Utility():
-    def __init__(self, effects=[], init_effects=[], name="", me=None):
+    def __init__(self, effects=[], name="", me=None):
         self.me = me
-        self.effects = effects
-        self.init_effects = init_effects
+        self.effects = effects[:]
+        self.active_effects = effects[:]
         self.name = name
             
-    def apply_effects(elapsed_time):
-        for e in self.effects:
-            e(self.me, elapsed_time, self=e, effects=self.effects)
+    def apply_effects(self, elapsed_time):
+        for e in self.active_effects:
+            e(self.me, elapsed_time, e, self.active_effects)
             
-    def add_owner(bf):
+    def add_owner(self, bf):
         self.me = bf
-        for e in self.init_effects:
-            e(self.me, self.effects, self=e)
+        for e in self.active_effects:
+            e(self.me, 0, e, self.active_effects)
+            
+    def reset_effects(self):
+        self.active_effects = self.effects[:]
     
         
 class Battlefly():
     def __init__(self, w1, w2, u1, u2, wins=0, battles=0):
-        self.reset_stats()
+        self.max_hull = 400
+        self.max_shield = 200
         self.w1 = w1
         self.w2 = w2
         self.u1 = u1
         self.u2 = u2
-        self.w1.add_owner(self)
-        self.w2.add_owner(self)
-        self.u1.add_owner(self)        
-        self.u2.add_owner(self)
+        self.reset_stats()
         self.wins = wins
         self.battles = battles
         self.traits = None
@@ -103,16 +104,22 @@ class Battlefly():
         self.battles += times
         
     def reset_stats(self):
-        self.hull = 400
+        self.hull = self.max_hull
         self.hull_regen_amt = 0
-        self.shield = 200
+        self.shield = self.max_shield
         self.shield_regen = 0.01
         self.shield_regen_amt = self.shield * self.shield_regen
-        self.armour = 0
+        self.armor = 0
         self.evasion_chance = 0.05
         self.dmg_multiplier = 1
         self.crit_chance = 0.05
-        self.critdmg = 2
+        self.crit_dmg = 2
+        self.u1.reset_effects()
+        self.u2.reset_effects()
+        self.w1.add_owner(self)
+        self.w2.add_owner(self)
+        self.u1.add_owner(self)        
+        self.u2.add_owner(self)
         self.add_traits()
         
     def add_traits(self, traits=None):

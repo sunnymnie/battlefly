@@ -1,6 +1,9 @@
 import json
 from battlefly import Battlefly, Weapon, Utility
-from mods import WEAPON, UTILITY, TRAIT
+from effects import WEAPON, UTILITY, TRAIT
+
+def test():
+    print("WOrks")
 
 def get_battleflies():
     with open('battleflies.json') as json_file:
