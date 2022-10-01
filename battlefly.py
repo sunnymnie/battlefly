@@ -18,7 +18,7 @@ class Weapon():
         
     def fast_forward_time_by(self, s):
         """
-        speeds up reload by s seconds and fire if reload reaches 0
+        speeds up reload by s milliseconds and fire if reload reaches 0
         """
         self.reload_wait -= s
         while self.reload_wait <= 0:
@@ -30,20 +30,21 @@ class Weapon():
         attacked = False
         for _ in range(self.burst):
             dmg_obj = {"dmg":self.dmg, "rng":random.uniform(0, 1)}
-            for e in effects:
-                e(self, me, enemy, dmg_obj, False)
-            if dmg_obj["rng"]>enemy.evasion_chance:
+            for e in self.effects:
+                e(self, self.me, self.enemy, dmg_obj, False)
+            if dmg_obj["rng"]>self.enemy.evasion_chance:
                 attacked = True
-                if enemy.shield>0:
-                    enemy.shield -= (dmg_obj["dmg"]-enemy.armor*1e3)  # Question: what happens if more damage for shield but have left over?
+                if self.enemy.shield>0:
+                    self.enemy.shield -= int(dmg_obj["dmg"]-self.enemy.armor)  # Question: what happens if more damage for shield but have left over?
                 else:
-                    enemy.hull -= (dmg_obj["dmg"]-enemy.armor*1e3)
-        e(self, me, enemy, {"dmg":0, "rng":0}, attacked)
+                    self.enemy.hull -= int(dmg_obj["dmg"]-self.enemy.armor)
+        for e in self.effects:
+            e(self, self.me, self.enemy, {"dmg":0, "rng":0}, attacked)
     
     def add_owner(self, bf):
         self.me = bf
         
-    def add_enemy(self, bf):
+    def set_enemy(self, bf):
         self.enemy = bf
         
     def remove_enemy(self):
@@ -71,8 +72,6 @@ class Utility():
         
 class Battlefly():
     def __init__(self, w1, w2, u1, u2, traits=[], wins=0, battles=0):
-        self.max_hull = 400
-        self.max_shield = 200
         self.traits = traits
         self.w1 = w1
         self.w2 = w2
@@ -91,6 +90,7 @@ class Battlefly():
         self.w2.fast_forward_time_by(time)
         
     def fast_forward_utilities(self, time):
+        if self.shield > 0: self.shield = min(self.max_shield, self.shield + (self.shield_regen_amt*time/1e3))
         self.u1.apply_effects(time)
         self.u2.apply_effects(time)
         
@@ -106,11 +106,12 @@ class Battlefly():
         self.battles += times
         
     def reset_stats(self):
+        self.max_hull = int(400*1e3)
+        self.max_shield = int(200*1e3)
         self.hull = self.max_hull
-        self.hull_regen_amt = 0
+        self.hull_regen = 0
         self.shield = self.max_shield
         self.shield_regen = 0.01
-        self.shield_regen_amt = self.shield * self.shield_regen
         self.armor = 0
         self.evasion_chance = 0.05
         self.dmg_multiplier = 1
@@ -123,6 +124,9 @@ class Battlefly():
         self.u1.add_owner(self)        
         self.u2.add_owner(self)
         self.add_traits()
+        self.hull_regen_amt = int(self.hull * self.hull_regen)
+        self.shield_regen_amt = int(self.shield * self.shield_regen)
+
         
     def add_traits(self, traits=None):
         if traits:

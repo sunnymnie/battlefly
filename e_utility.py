@@ -54,11 +54,13 @@ def auto_reloaders(bf, time, self, effects):
     effects.remove(self)
     bf.w1.reload = int(bf.w1.reload*0.97)
     bf.w2.reload = int(bf.w2.reload*0.97)
+    bf.w1.reload_wait = bf.w1.reload
+    bf.w2.reload_wait = bf.w2.reload
+
     
 def boosters_thrusters(bf, time, self, effects):
     effects.remove(self)
-    bf.w1.reload = int(bf.w1.reload*0.97)
-    bf.w2.reload = int(bf.w2.reload*0.97)
+    bf.evasion_chance += 0.03
     
 def cryo_ammo(bf, time, self, effects): #per shot?
     effects.remove(self)
