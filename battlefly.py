@@ -1,7 +1,7 @@
 import random
 
 class Weapon():
-    def __init__(self, burst, dmg, reload, effects=[], me=None, name="", enemy=None):
+    def __init__(self, burst, dmg, reload, effects, me=None, name="", enemy=None):
         """
         - me: BF with this weapon
         - enemy: The BF this weapon is firing upon
@@ -27,16 +27,18 @@ class Weapon():
         
     def shoot_at_enemy(self):
         # Reduce enemy health
+        attacked = False
         for _ in range(self.burst):
-            rng = random.uniform(0, 1)
-            dmg = self.dmg
+            dmg_obj = {"dmg":self.dmg, "rng":random.uniform(0, 1)}
             for e in effects:
-                dmg, rng = e(self, me, enemy, dmg, rng)
-            if rng>enemy.evasion_chance:
+                e(self, me, enemy, dmg_obj, False)
+            if dmg_obj["rng"]>enemy.evasion_chance:
+                attacked = True
                 if enemy.shield>0:
-                    enemy.shield -= dmg  # Question: what happens if more damage for shield but have left over?
+                    enemy.shield -= (dmg_obj["dmg"]-enemy.armor*1e3)  # Question: what happens if more damage for shield but have left over?
                 else:
-                    enemy.hull -= dmg
+                    enemy.hull -= (dmg_obj["dmg"]-enemy.armor*1e3)
+        e(self, me, enemy, {"dmg":0, "rng":0}, attacked)
     
     def add_owner(self, bf):
         self.me = bf
@@ -48,7 +50,7 @@ class Weapon():
         self.enemy = None
     
 class Utility():
-    def __init__(self, effects=[], name="", me=None):
+    def __init__(self, effects, name="", me=None):
         self.me = me
         self.effects = effects[:]
         self.active_effects = effects[:]
@@ -68,9 +70,10 @@ class Utility():
     
         
 class Battlefly():
-    def __init__(self, w1, w2, u1, u2, wins=0, battles=0):
+    def __init__(self, w1, w2, u1, u2, traits=[], wins=0, battles=0):
         self.max_hull = 400
         self.max_shield = 200
+        self.traits = traits
         self.w1 = w1
         self.w2 = w2
         self.u1 = u1
@@ -78,7 +81,6 @@ class Battlefly():
         self.reset_stats()
         self.wins = wins
         self.battles = battles
-        self.traits = None
         
     def reloading_for(self):
         """returns how long till one weapon finishes reloading"""
@@ -125,8 +127,9 @@ class Battlefly():
     def add_traits(self, traits=None):
         if traits:
             self.traits = traits
-        for t in traits:
+        for t in self.traits:
             t(self)
+
     def get_name(self):
         name = self.w1.name + "_" + self.w2.name + "_" + self.u1.name + "_" + self.u2.name + "_"
         name += f"{len(self.traits)}"

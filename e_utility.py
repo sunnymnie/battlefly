@@ -62,9 +62,9 @@ def boosters_thrusters(bf, time, self, effects):
     
 def cryo_ammo(bf, time, self, effects): #per shot?
     effects.remove(self)
-    def cryo_ammo(weapon, bf, enemy, dmg, rng):
-        enemy.w1.reload_wait += int(0.25*1e3)
-        enemy.w2.reload_wait += int(0.25*1e3)
-        return dmg, rng
+    def cryo_ammo(weapon, bf, enemy, dmg, hit):
+        if hit:
+            enemy.w1.reload_wait += int(0.25*1e3)
+            enemy.w2.reload_wait += int(0.25*1e3)
     bf.w1.effects.append(cryo_ammo)
     bf.w2.effects.append(cryo_ammo)

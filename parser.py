@@ -2,9 +2,6 @@ import json
 from battlefly import Battlefly, Weapon, Utility
 from effects import WEAPON, UTILITY, TRAIT
 
-def test():
-    print("WOrks")
-
 def get_battleflies():
     with open('battleflies.json') as json_file:
         data = json.load(json_file)
@@ -34,11 +31,9 @@ def convert_weapon_to_json(w):
     return res
 
 def convert_utility_to_json(u):
-    res = {"name":name, "effects":[], "init_effects":[]}
+    res = {"name":u.name, "effects":[]}
     for e in u.effects:
         res["effects"].append(e.__name__)
-    for e in u.init_effects:
-        res["init_effects"].append(e.__name__)
     return res
 
 def convert_json_to_bf(bf):
@@ -67,8 +62,6 @@ def convert_json_to_utility(u, bf=None):
     init_effects = []
     for e in u["effects"]:
         effects.append(UTILITY[e])
-    for e in u["init_effects"]:
-        init_effects.append(UTILITY[e])
-    new = Utility(effects, init_effects, u["name"])
+    new = Utility(effects, u["name"])
     if bf: new.add_owner(bf)
     return new
