@@ -1,4 +1,6 @@
 import random
+from copy import deepcopy
+
 
 class Weapon():
     def __init__(self, burst, dmg, reload, effects, me=None, name="", enemy=None):
@@ -30,6 +32,8 @@ class Weapon():
         attacked = False
         for _ in range(self.burst):
             dmg_obj = {"dmg":self.dmg, "rng":random.uniform(0, 1)}
+            if random.uniform(0, 1) < self.me.crit_chance:
+                dmg_obj["dmg"] = int(self.me.crit_dmg*dmg_obj["dmg"])
             for e in self.effects:
                 e(self, self.me, self.enemy, dmg_obj, False)
             if dmg_obj["rng"]>self.enemy.evasion_chance:
@@ -66,8 +70,8 @@ class Utility():
         for e in self.active_effects:
             e(self.me, 0, e, self.active_effects)
             
-    def reset_effects(self):
-        self.active_effects = self.effects[:]
+    # def reset_effects(self):
+    #     self.active_effects = self.effects[:]
     
         
 class Battlefly():
@@ -77,6 +81,10 @@ class Battlefly():
         self.w2 = w2
         self.u1 = u1
         self.u2 = u2
+        self.w1_backup = deepcopy(w1)
+        self.w2_backup = deepcopy(w2)
+        self.u1_backup = deepcopy(u1)
+        self.u2_backup = deepcopy(u2)
         self.reset_stats()
         self.wins = wins
         self.battles = battles
@@ -90,7 +98,7 @@ class Battlefly():
         self.w2.fast_forward_time_by(time)
         
     def fast_forward_utilities(self, time):
-        if self.shield > 0: self.shield = min(self.max_shield, self.shield + (self.shield_regen_amt*time/1e3))
+        if self.shield > 0: self.shield = min(self.max_shield, self.shield + int(self.shield_regen_amt*time/1e3))
         self.u1.apply_effects(time)
         self.u2.apply_effects(time)
         
@@ -117,8 +125,12 @@ class Battlefly():
         self.dmg_multiplier = 1
         self.crit_chance = 0.05
         self.crit_dmg = 2
-        self.u1.reset_effects()
-        self.u2.reset_effects()
+        self.w1 = deepcopy(self.w1_backup)
+        self.w2 = deepcopy(self.w2_backup)
+        self.u1 = deepcopy(self.u1_backup)
+        self.u2 = deepcopy(self.u2_backup)
+        # self.u1.reset_effects()
+        # self.u2.reset_effects()
         self.w1.add_owner(self)
         self.w2.add_owner(self)
         self.u1.add_owner(self)        
