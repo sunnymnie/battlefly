@@ -1,7 +1,10 @@
 from effects import WEAPON as w_effects
 from effects import UTILITY as u_effects
+from effects import DEFENSE as d_effects
 from battlefly import Weapon, Utility
 from copy import deepcopy
+
+MAX_LVL = 1
 
 WEAPON = {
     "proton_blaster": [
@@ -25,26 +28,11 @@ WEAPON = {
 }
 
 UTILITY = {
-    "force_shield_warp": [
-        Utility([u_effects["force_shield_warp"]], name="warp1")
-    ],
     "overclocking_protocols": [
         Utility([u_effects["overclocking_protocols"]], name="over1")
     ],
-    "ceramo_armor": [
-        Utility([u_effects["ceramo_armor"]], name="cer1")
-    ],
-    "plasteel_hull": [
-        Utility([u_effects["plasteel_hull"]], name="pla1")
-    ],
     "regenerative_nanobot": [
         Utility([u_effects["regenerative_nanobot"]], name="reg1")
-    ],
-    "force_shield_at": [
-        Utility([u_effects["force_shield_at"]], name="at1")
-    ],
-    "force_shield_nx": [
-        Utility([u_effects["force_shield_nx"]], name="nx1")
     ],
     "combat_algorithms_processor": [
         Utility([u_effects["combat_algorithms_processor"]], name="cbt1")
@@ -55,11 +43,29 @@ UTILITY = {
     "auto_reloaders": [
         Utility([u_effects["auto_reloaders"]], name="auto1")
     ],
-    "boosters_thrusters": [
-        Utility([u_effects["boosters_thrusters"]], name="boost1")
-    ],
     "cryo_ammo": [
         Utility([u_effects["cryo_ammo"]], name="cryo1")
+    ],
+}
+
+DEFENSE = {
+    "force_shield_warp": [
+        Utility([d_effects["force_shield_warp"]], name="warp1")
+    ],
+    "ceramo_armor": [
+        Utility([d_effects["ceramo_armor"]], name="cer1")
+    ],
+    "plasteel_hull": [
+        Utility([d_effects["plasteel_hull"]], name="pla1")
+    ],
+    "force_shield_at": [
+        Utility([d_effects["force_shield_at"]], name="at1")
+    ],
+    "force_shield_nx": [
+        Utility([d_effects["force_shield_nx"]], name="nx1")
+    ],
+    "boosters_thrusters": [
+        Utility([d_effects["boosters_thrusters"]], name="boost1")
     ],
 }
 
@@ -68,3 +74,15 @@ def get_weapon(name, lvl):
 
 def get_utility(name, lvl):
     return deepcopy(UTILITY[name][lvl-1])
+
+def get_defense(name, lvl):
+    return deepcopy(DEFENSE[name][lvl-1])
+
+def get_weapons_list():
+    return list(WEAPON.keys())
+
+def get_utilities_list():
+    return list(UTILITY.keys())
+
+def get_defenses_list():
+    return list(DEFENSE.keys())

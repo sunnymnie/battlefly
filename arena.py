@@ -1,7 +1,72 @@
 import matplotlib.pyplot as plt
 import numpy as np
+import pandas as pd
+import threading
+import random
 
+RUN = True
 
+class Run:
+    def __init__(self):
+        self.run = True
+    def stop(self):
+        self.run = False
+    def start(self):
+        self.run = True
+
+def generate_report(bf1, bf2, num, name=None, win_loss_color=False):
+    """generates a report saved to name for num batles between bf1 and bf2"""
+    dfs, a = multiple_fights(bf1, bf2, num)
+    render_report(dfs, a, win_loss_color=win_loss_color, save_name=name)
+    
+def run_battles(bfs, batch=1, num_threads=1, total=None):
+    """continuously runs battles randomly between BFs in bfs, each BF facing off random in batch size battles"""
+    global RUN
+    RUN = True
+    bfs_in_use = list(map(lambda x: 0, bfs))
+    # run = [True]
+    threads = []
+    lock = threading.Lock()
+    for _ in range(num_threads):
+        t = threading.Thread(target=run_battle_thread, args=(bfs, bfs_in_use, batch, lock))
+        threads.append(t)
+    threads.append(threading.Thread(target=stopping_thread))
+    for t in threads:
+        t.start()
+    for t in threads:
+        t.join()
+    
+def run_battle_thread(bfs, bfs_in_use, batch, lock):
+    """continuously runs battles, updating which bfs are in use and freeing them"""
+    while RUN:
+        lock.acquire()
+        bf1, bf2, i, j = find_unused_bfs_and_use(bfs, bfs_in_use)
+        lock.release()
+        for _ in range(batch):
+            fight_battleflies(bf1, bf2, False)
+        return_bfs(bfs_in_use, i, j)
+        
+def stopping_thread():
+    """input to stop threads"""
+    global RUN
+    input("Press enter to stop battles")
+    RUN = False
+    
+def find_unused_bfs_and_use(bfs, bfs_in_use):
+    l = len(bfs_in_use)-1
+    i, j = random.randint(0, l), random.randint(0, l)
+    while i == j or bfs_in_use[i] == 1 or bfs_in_use[j] == 1:
+        i, j = random.randint(0, l), random.randint(0, l)
+    bfs_in_use[i] = 1
+    bfs_in_use[j] = 1
+    return bfs[i], bfs[j], i, j
+    
+def return_bfs(bfs_in_use, i, j):
+    bfs_in_use[i] = 0
+    bfs_in_use[j] = 0
+    
+    
+    
 def fight_battleflies(bf1, bf2, detailed=False):
     status={"shield1":[bf1.shield], 
             "hull1":[bf1.hull], 
@@ -55,7 +120,7 @@ def turn_report_into_df(s):
     return df
 
 
-def render_report(win_loss_color=False, save_name=None):
+def render_report(dfs, a, win_loss_color=False, save_name=None):
     fig, ax = plt.subplots(figsize=(10, 6), nrows=2)
     fig.tight_layout()
 

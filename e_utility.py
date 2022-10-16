@@ -6,39 +6,9 @@ def overclocking_protocols(bf, time, self, effects):
         bf.w1.reload = int(bf.w1.reload*0.94)
         bf.w2.reload = int(bf.w2.reload*0.94)
         
-def ceramo_armor(bf, time, self, effects):
-    effects.remove(self)
-    bf.armor = 4*1e3
-    
-def plasteel_hull(bf, time, self, effects):
-    effects.remove(self)
-    bf.armor = 1*1e3
-    bf.hull = int(bf.hull*1.04)
-    
 def regenerative_nanobot(bf, time, self, effects):
     regen = 0.002
     bf.hull = min(bf.max_hull, bf.hull + int(time/1e3*(regen*bf.max_hull)))
-    
-def force_shield_at(bf, time, self, effects):
-    effects.remove(self)
-    bf.max_shield += 50*1e3
-    bf.shield = bf.max_shield
-    
-def force_shield_nx(bf, time, self, effects):
-    effects.remove(self)
-    bf.max_shield += int(25*1e3)
-    bf.shield = bf.max_shield
-    bf.shield_regen += 0.005
-    
-def force_shield_warp(bf, time, self, effects):
-    effects.remove(self)
-    bf.max_shield += int(12.5*1e3)
-    bf.shield = bf.max_shield
-    bf.shield_regen += 0.01
-    # def force_shield_warp(bf, time, self, effects):
-    #     regen = 0.01
-    #     bf.shield = min(bf.max_shield, bf.sheild + int(time/1e3*(regen*bf.max_shield)))
-    # effects.append(force_shield_warp)
     
 def combat_algorithms_processor(bf, time, self, effects):
     effects.remove(self)
@@ -58,11 +28,7 @@ def auto_reloaders(bf, time, self, effects):
     bf.w2.reload_wait = bf.w2.reload
 
     
-def boosters_thrusters(bf, time, self, effects):
-    effects.remove(self)
-    bf.evasion_chance += 0.03
-    
-def cryo_ammo(bf, time, self, effects): #per shot?
+def cryo_ammo(bf, time, self, effects): #per shot? 
     effects.remove(self)
     def cryo_ammo(weapon, bf, enemy, dmg, hit):
         if hit:

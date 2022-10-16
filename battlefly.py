@@ -147,7 +147,11 @@ class Battlefly():
             t(self)
 
     def get_name(self):
-        name = self.w1.name + "_" + self.w2.name + "_" + self.u1.name + "_" + self.u2.name + "_"
+        if self.w1.name < self.w2.name:
+            name = self.w1.name + "_" + self.w2.name 
+        else:
+            name = self.w2.name + "_" + self.w1.name 
+        name += "_" + self.u1.name + "_" + self.u2.name + "_"
         name += f"{len(self.traits)}"
         for t in self.traits:
             name += f"_{t.__name__}"
